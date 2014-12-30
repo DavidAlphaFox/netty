@@ -32,6 +32,9 @@ public class NioEventLoopGroup extends MultithreadEventLoopGroup {
      * Create a new instance using the default number of threads, the default {@link ThreadFactory} and
      * the {@link SelectorProvider} which is returned by {@link SelectorProvider#provider()}.
      */
+    //如果是0的话使用当前系统CPU数量2倍的线程作为这个Group的线程数量
+    //可以通过设置io.netty.eventLoopThreads来修改这个配置
+    //也可以在构造Group 的时候直接指定数量
     public NioEventLoopGroup() {
         this(0);
     }

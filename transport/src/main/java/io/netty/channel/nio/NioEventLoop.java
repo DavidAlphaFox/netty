@@ -222,6 +222,7 @@ public final class NioEventLoop extends SingleThreadEventLoop {
      * around the infamous epoll 100% CPU bug.
      */
     public void rebuildSelector() {
+        //如果不在当前的线程中，创建一个Runnable任务丢给任务队列去执行
         if (!inEventLoop()) {
             execute(new Runnable() {
                 @Override
@@ -231,7 +232,8 @@ public final class NioEventLoop extends SingleThreadEventLoop {
             });
             return;
         }
-
+        //否则，重新开一selector，并把老的seletor中的数据
+        // 复制给新的selector
         final Selector oldSelector = selector;
         final Selector newSelector;
 
@@ -298,13 +300,16 @@ public final class NioEventLoop extends SingleThreadEventLoop {
 
         logger.info("Migrated " + nChannels + " channel(s) to the new Selector.");
     }
-
+    //覆盖SingleThreadEventExecutor的方法
+    //不断的去调用seletor等待事件发生
     @Override
     protected void run() {
         for (;;) {
+            //先将wakeUp设置成fasle,并把前次的值保存下来
             boolean oldWakenUp = wakenUp.getAndSet(false);
             try {
                 if (hasTasks()) {
+                    //任务队列不空
                     selectNow();
                 } else {
                     select(oldWakenUp);
@@ -336,7 +341,8 @@ public final class NioEventLoop extends SingleThreadEventLoop {
                     // It is inefficient in that it wakes up the selector for both
                     // the first case (BAD - wake-up required) and the second case
                     // (OK - no wake-up required).
-
+                    //防止wakenUp的设置被忽略掉
+                    //前面的注视很详细的解释的race condition的情况
                     if (wakenUp.get()) {
                         selector.wakeup();
                     }
@@ -346,6 +352,9 @@ public final class NioEventLoop extends SingleThreadEventLoop {
                 needsToSelectAgain = false;
                 final int ioRatio = this.ioRatio;
                 if (ioRatio == 100) {
+                    //先处理io事件
+                    //再处理定时任务
+                    //定时任务没有处理时限？
                     processSelectedKeys();
                     runAllTasks();
                 } else {
@@ -354,6 +363,9 @@ public final class NioEventLoop extends SingleThreadEventLoop {
                     processSelectedKeys();
 
                     final long ioTime = System.nanoTime() - ioStartTime;
+                    //先处理io事件
+                    //再处理定时任务
+                    //定时任务时间限制不大于io处理的时间
                     runAllTasks(ioTime * (100 - ioRatio) / ioRatio);
                 }
 
@@ -584,7 +596,9 @@ public final class NioEventLoop extends SingleThreadEventLoop {
             logger.warn("Unexpected exception while running NioTask.channelUnregistered()", e);
         }
     }
-
+    //调用者和selector不在同一个线程中
+    //并且wakenUp是false
+    //调用selector.wakeup唤醒selector的线程
     @Override
     protected void wakeup(boolean inEventLoop) {
         if (!inEventLoop && wakenUp.compareAndSet(false, true)) {
@@ -594,6 +608,7 @@ public final class NioEventLoop extends SingleThreadEventLoop {
 
     void selectNow() throws IOException {
         try {
+            //select一下立刻返回
             selector.selectNow();
         } finally {
             // restore wakup state if needed
@@ -608,8 +623,10 @@ public final class NioEventLoop extends SingleThreadEventLoop {
         try {
             int selectCnt = 0;
             long currentTimeNanos = System.nanoTime();
+            //计算selector需要等待的事件
             long selectDeadLineNanos = currentTimeNanos + delayNanos(currentTimeNanos);
             for (;;) {
+                //第一次select的时候应当为 500000L / 1000000L
                 long timeoutMillis = (selectDeadLineNanos - currentTimeNanos + 500000L) / 1000000L;
                 if (timeoutMillis <= 0) {
                     if (selectCnt == 0) {

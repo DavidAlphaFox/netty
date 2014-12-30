@@ -506,6 +506,7 @@ public abstract class SingleThreadEventExecutor extends AbstractEventExecutor {
         return ran;
     }
 
+    //关闭的实现
     @Override
     public Future<?> shutdownGracefully(long quietPeriod, long timeout, TimeUnit unit) {
         if (quietPeriod < 0) {
@@ -518,7 +519,8 @@ public abstract class SingleThreadEventExecutor extends AbstractEventExecutor {
         if (unit == null) {
             throw new NullPointerException("unit");
         }
-
+        //如果已经在关闭
+        //直接返回terminationFuture这个promise
         if (isShuttingDown()) {
             return terminationFuture();
         }
@@ -534,6 +536,7 @@ public abstract class SingleThreadEventExecutor extends AbstractEventExecutor {
             wakeup = true;
             oldState = STATE_UPDATER.get(this);
             if (inEventLoop) {
+                //如果在当前线程内直接改变状态
                 newState = ST_SHUTTING_DOWN;
             } else {
                 switch (oldState) {

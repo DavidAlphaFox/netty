@@ -46,18 +46,21 @@ public abstract class MultithreadEventExecutorGroup extends AbstractEventExecuto
         if (nThreads <= 0) {
             throw new IllegalArgumentException(String.format("nThreads: %d (expected: > 0)", nThreads));
         }
-
+        //创建线程工厂
+        //用来给线程分组
         if (threadFactory == null) {
             threadFactory = newDefaultThreadFactory();
         }
-
+        //创建一个有nThreads的EventExcutor数组
         children = new SingleThreadEventExecutor[nThreads];
         if (isPowerOfTwo(children.length)) {
             chooser = new PowerOfTwoEventExecutorChooser();
         } else {
             chooser = new GenericEventExecutorChooser();
         }
-
+        //循环创建所有线程
+        //如果创建不成功直接杀掉所有之前创建的线程
+        //并结束当前线程的执行
         for (int i = 0; i < nThreads; i ++) {
             boolean success = false;
             try {
@@ -86,7 +89,9 @@ public abstract class MultithreadEventExecutorGroup extends AbstractEventExecuto
                 }
             }
         }
-
+        //创建一个监听者，每当一个线程结束的时候，就会收到一个消息
+        //当所有线程全都结束了，这个这个Group被正常结束的标记
+        //如果前面的创建出错是无法走到这个地方
         final FutureListener<Object> terminationListener = new FutureListener<Object>() {
             @Override
             public void operationComplete(Future<Object> future) throws Exception {

@@ -34,6 +34,7 @@ public abstract class AbstractEventExecutor extends AbstractExecutorService impl
         return this;
     }
 
+    //判断是否在当前线程内
     @Override
     public boolean inEventLoop() {
         return inEventLoop(Thread.currentThread());
