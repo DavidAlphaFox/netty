@@ -225,12 +225,13 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
             this.childOptions = childOptions;
             this.childAttrs = childAttrs;
         }
-
+        //这个地方处理accept后的channel
         @Override
         @SuppressWarnings("unchecked")
         public void channelRead(ChannelHandlerContext ctx, Object msg) {
             final Channel child = (Channel) msg;
-
+            //获取到新Channel的pipeline
+            //并将pipeline设置为真正的pipeline
             child.pipeline().addLast(childHandler);
 
             for (Entry<ChannelOption<?>, Object> e: childOptions) {
@@ -247,6 +248,8 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
                 child.attr((AttributeKey<Object>) e.getKey()).set(e.getValue());
             }
 
+            //尝试在子Group上注册
+            //不成功直接关掉
             try {
                 childGroup.register(child).addListener(new ChannelFutureListener() {
                     @Override
