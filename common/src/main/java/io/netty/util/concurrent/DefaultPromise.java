@@ -29,6 +29,8 @@ import java.util.concurrent.TimeUnit;
 
 import static java.util.concurrent.TimeUnit.*;
 
+//直接让FutureListener在promise的线程中执行
+
 public class DefaultPromise<V> extends AbstractFuture<V> implements Promise<V> {
 
     private static final InternalLogger logger = InternalLoggerFactory.getInstance(DefaultPromise.class);
