@@ -37,6 +37,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * The default {@link ChannelGroup} implementation.
  */
+//实现ChannelGroup的接口
+//让一个组Channel做相同的动作
+//并且将所有的future对象全部都保存下来作为GroupFuture返回给调用者
+
 public class DefaultChannelGroup extends AbstractSet<Channel> implements ChannelGroup {
 
     private static final AtomicInteger nextId = new AtomicInteger();

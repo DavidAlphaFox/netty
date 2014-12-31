@@ -30,7 +30,7 @@ import java.util.concurrent.TimeUnit;
 import static java.util.concurrent.TimeUnit.*;
 
 //直接让FutureListener在promise的线程中执行
-
+//必须和EventExecuter配合使用
 public class DefaultPromise<V> extends AbstractFuture<V> implements Promise<V> {
 
     private static final InternalLogger logger = InternalLoggerFactory.getInstance(DefaultPromise.class);
@@ -646,6 +646,7 @@ public class DefaultPromise<V> extends AbstractFuture<V> implements Promise<V> {
     protected static void notifyListener(
             final EventExecutor eventExecutor, final Future<?> future, final GenericFutureListener<?> l) {
 
+        //在当前的eventloop中就直接执行
         if (eventExecutor.inEventLoop()) {
             final InternalThreadLocalMap threadLocals = InternalThreadLocalMap.get();
             final int stackDepth = threadLocals.futureListenerStackDepth();
@@ -659,7 +660,7 @@ public class DefaultPromise<V> extends AbstractFuture<V> implements Promise<V> {
                 return;
             }
         }
-
+        //否则丢给指定的eventloop去执行
         execute(eventExecutor, new Runnable() {
             @Override
             public void run() {
