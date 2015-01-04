@@ -542,6 +542,8 @@ public class DefaultPromise<V> extends AbstractFuture<V> implements Promise<V> {
         waiters --;
     }
 
+   //这里面使用MAX_LISTENER_STACK_DEPTH来控制什么？
+
     private void notifyListeners() {
         // This method doesn't need synchronization because:
         // 1) This method is always called after synchronized (this) block.

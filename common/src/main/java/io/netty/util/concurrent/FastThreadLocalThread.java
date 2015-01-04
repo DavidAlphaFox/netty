@@ -20,6 +20,8 @@ import io.netty.util.internal.InternalThreadLocalMap;
 /**
  * A special {@link Thread} that provides fast access to {@link FastThreadLocal} variables.
  */
+//创建一个支持快速获取线程局部存储的线程
+//就是在线程类中自己集成线程局部存储
 public class FastThreadLocalThread extends Thread {
 
     private InternalThreadLocalMap threadLocalMap;

@@ -60,7 +60,7 @@ public final class InternalThreadLocalMap extends UnpaddedInternalThreadLocalMap
             return slowGet();
         }
     }
-
+    //线程局部存储不存在的时候，直接创建一个线程局部存储
     private static InternalThreadLocalMap fastGet(FastThreadLocalThread thread) {
         InternalThreadLocalMap threadLocalMap = thread.threadLocalMap();
         if (threadLocalMap == null) {
@@ -68,14 +68,15 @@ public final class InternalThreadLocalMap extends UnpaddedInternalThreadLocalMap
         }
         return threadLocalMap;
     }
-
+    //使用ThreadLocal来获取线程局部存储
     private static InternalThreadLocalMap slowGet() {
         ThreadLocal<InternalThreadLocalMap> slowThreadLocalMap = UnpaddedInternalThreadLocalMap.slowThreadLocalMap;
+        //先建立ThreadLocal
         if (slowThreadLocalMap == null) {
             UnpaddedInternalThreadLocalMap.slowThreadLocalMap =
                     slowThreadLocalMap = new ThreadLocal<InternalThreadLocalMap>();
         }
-
+        //再建立ThreadLocal中的Map
         InternalThreadLocalMap ret = slowThreadLocalMap.get();
         if (ret == null) {
             ret = new InternalThreadLocalMap();
