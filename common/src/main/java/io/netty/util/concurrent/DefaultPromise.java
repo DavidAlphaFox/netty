@@ -238,6 +238,9 @@ public class DefaultPromise<V> extends AbstractFuture<V> implements Promise<V> {
         PlatformDependent.throwException(cause);
     }
 
+    //future的await不会阻塞eventloop
+    //而是阻塞调用await的线程
+    //这个地方使用的是Java的Object Monitor机制
     @Override
     public Promise<V> await() throws InterruptedException {
         if (isDone()) {
