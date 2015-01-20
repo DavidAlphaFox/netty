@@ -94,6 +94,9 @@ import java.util.concurrent.TimeUnit;
  * @see ReadTimeoutHandler
  * @see WriteTimeoutHandler
  */
+//IdleStateHandler直接使用EventExecutor中的schedule来调度
+//这直接在当前的EventLoop上进行调度，而不是在TimeWheel的线程
+//这样可以避免在多个Evenloop上共享TimeWheel的线程，减少锁
 public class IdleStateHandler extends ChannelDuplexHandler {
     private static final long MIN_TIMEOUT_NANOS = TimeUnit.MILLISECONDS.toNanos(1);
 
