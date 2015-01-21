@@ -707,7 +707,9 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap impleme
 
         return promise;
     }
-
+    //ChannelHandlerContext的write是记录位置的
+    //不是从Pipeline的起点开始写
+    //而是直接写入Pipeline当前Handler的下一个Handler
     private void write(Object msg, boolean flush, ChannelPromise promise) {
 
         AbstractChannelHandlerContext next = findContextOutbound();

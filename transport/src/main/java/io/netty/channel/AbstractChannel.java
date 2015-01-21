@@ -228,6 +228,8 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
         return this;
     }
 
+    //Channel的write使用的是Pipeline的write函数
+    //从Pipleline的第一个Outbound的Filter向外写
     @Override
     public ChannelFuture write(Object msg) {
         return pipeline.write(msg);
