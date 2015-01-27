@@ -1049,6 +1049,8 @@ final class DefaultChannelPipeline implements ChannelPipeline {
             unsafe.beginRead();
         }
 
+        //写出的对后去处
+
         @Override
         public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
             unsafe.write(msg, promise);

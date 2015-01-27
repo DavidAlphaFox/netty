@@ -60,6 +60,10 @@ public abstract class ChannelInitializer<C extends Channel> extends ChannelInbou
      */
     protected abstract void initChannel(C ch) throws Exception;
 
+    //当Channel被注册的时候会先调用这个东东
+    //调用自己的函数initChannel把当前的pipeline传进去
+    //当调用成功会将自身从当前Pipeline上去掉
+    //如果没有成功建立连接，直接关闭这个Channel
     @Override
     @SuppressWarnings("unchecked")
     public final void channelRegistered(ChannelHandlerContext ctx) throws Exception {

@@ -57,6 +57,9 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
         return new NioByteUnsafe();
     }
 
+    //Nio的Unsafe实现
+    //继承自AbstractNioUnsafe
+    //非线程安全
     private final class NioByteUnsafe extends AbstractNioUnsafe {
         private RecvByteBufAllocator.Handle allocHandle;
 

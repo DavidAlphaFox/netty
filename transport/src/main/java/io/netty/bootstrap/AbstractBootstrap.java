@@ -91,6 +91,8 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
      * You either use this or {@link #channelFactory(ChannelFactory)} if your
      * {@link Channel} implementation has no no-args constructor.
      */
+    //当设置Channel后将使用
+    // BootstrapChannelFactory作为默认的ChannelFactory来获取Channel
     public B channel(Class<? extends C> channelClass) {
         if (channelClass == null) {
             throw new NullPointerException("channelClass");
@@ -268,7 +270,8 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
         }
         return doBind(localAddress);
     }
-
+    //Server的bootstrap过程
+    //初始化并注册一个Channel
     private ChannelFuture doBind(final SocketAddress localAddress) {
         final ChannelFuture regFuture = initAndRegister();
         final Channel channel = regFuture.channel();
@@ -304,6 +307,8 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
         }
     }
 
+    //先获取一个Channel
+    //然后调用虚函数init来初始化该Channel
     final ChannelFuture initAndRegister() {
         final Channel channel = channelFactory().newChannel();
         try {

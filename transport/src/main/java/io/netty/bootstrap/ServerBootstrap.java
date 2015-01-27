@@ -161,8 +161,12 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
                 channel.attr(key).set(e.getValue());
             }
         }
-
+        //这个地方使用的是DefaultPipeline
         ChannelPipeline p = channel.pipeline();
+        //如果此处附加了更多的handler的话
+        //将这个handler添加到pipeline的最后面
+        //这个地方是acceptor的pipeline
+        //不是已经连接的Channel的pipeline（ChildPipeline）
         if (handler() != null) {
             p.addLast(handler());
         }
@@ -177,7 +181,7 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
         synchronized (childAttrs) {
             currentChildAttrs = childAttrs.entrySet().toArray(newAttrArray(childAttrs.size()));
         }
-
+        //在Acceptor的Pipeline上再添加
         p.addLast(new ChannelInitializer<Channel>() {
             @Override
             public void initChannel(Channel ch) throws Exception {
@@ -226,6 +230,8 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
             this.childAttrs = childAttrs;
         }
         //这个地方处理accept后的channel
+        //这个地方已经是连接成功的Channel
+        //不是Acceptor的Channel
         @Override
         @SuppressWarnings("unchecked")
         public void channelRead(ChannelHandlerContext ctx, Object msg) {

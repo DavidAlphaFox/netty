@@ -76,6 +76,10 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
      * @param parent
      *        the parent of this channel. {@code null} if there's no parent.
      */
+
+    //连接建立起来之后
+    //先建立Unsafe，直接对Channel的操作
+    //同时建立Pipeline
     protected AbstractChannel(Channel parent) {
         this.parent = parent;
         unsafe = newUnsafe();
@@ -444,6 +448,8 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
                 doRegister();
                 registered = true;
                 safeSetSuccess(promise);
+                //当ChannelInitializer被调用的时候
+                //这个Channel已经在子EventLoop上了
                 pipeline.fireChannelRegistered();
                 if (isActive()) {
                     pipeline.fireChannelActive();
