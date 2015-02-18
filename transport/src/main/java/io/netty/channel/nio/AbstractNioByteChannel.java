@@ -103,6 +103,7 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
             }
 
             final ChannelPipeline pipeline = pipeline();
+            //默认情况下使用UnpooledByteBufAllocator
             final ByteBufAllocator allocator = config.getAllocator();
             final int maxMessagesPerRead = config.getMaxMessagesPerRead();
             RecvByteBufAllocator.Handle allocHandle = this.allocHandle;
