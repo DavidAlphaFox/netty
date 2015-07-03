@@ -131,7 +131,7 @@ public class NioServerSocketChannel extends AbstractNioMessageChannel
     }
 
     //此处进行了accept之后fire到default的pipleline中了
-    
+    //由NioMessageUnsafe.read触发
     @Override
     protected int doReadMessages(List<Object> buf) throws Exception {
         SocketChannel ch = javaChannel().accept();

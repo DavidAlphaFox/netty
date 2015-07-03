@@ -48,7 +48,7 @@ public abstract class AbstractNioMessageChannel extends AbstractNioChannel {
     private final class NioMessageUnsafe extends AbstractNioUnsafe {
 
         private final List<Object> readBuf = new ArrayList<Object>();
-
+        //Channel的read事件或accept事件
         @Override
         public void read() {
             assert eventLoop().inEventLoop();

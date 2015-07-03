@@ -312,7 +312,8 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap impleme
         if (msg == null) {
             throw new NullPointerException("msg");
         }
-
+        //找到下一个inbound的channel handler
+        //如果这个handler和当前的handler不在同一个线程中，需要做线程变换操作
         final AbstractChannelHandlerContext next = findContextInbound();
         EventExecutor executor = next.executor();
         if (executor.inEventLoop()) {

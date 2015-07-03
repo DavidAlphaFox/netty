@@ -230,8 +230,7 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
             this.childAttrs = childAttrs;
         }
         //这个地方处理accept后的channel
-        //这个地方已经是连接成功的Channel
-        //不是Acceptor的Channel
+        //这个handler是acceptor的pipeline中最后一个handler
         @Override
         @SuppressWarnings("unchecked")
         public void channelRead(ChannelHandlerContext ctx, Object msg) {
@@ -274,7 +273,7 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
             child.unsafe().closeForcibly();
             logger.warn("Failed to register an accepted channel: " + child, t);
         }
-
+        //acceptor的channel发生了异常
         @Override
         public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
             final ChannelConfig config = ctx.channel().config();

@@ -520,6 +520,7 @@ public final class NioEventLoop extends SingleThreadEventLoop {
             // Also check for readOps of 0 to workaround possible JDK bug which may otherwise lead
             // to a spin loop
             if ((readyOps & (SelectionKey.OP_READ | SelectionKey.OP_ACCEPT)) != 0 || readyOps == 0) {
+                //调用channel的unsafe的read接口
                 unsafe.read();
                 if (!ch.isOpen()) {
                     // Connection already closed - no need to handle write.

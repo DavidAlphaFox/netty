@@ -91,10 +91,13 @@ public abstract class SimpleChannelInboundHandler<I> extends ChannelInboundHandl
      * Returns {@code true} if the given message should be handled. If {@code false} it will be passed to the next
      * {@link ChannelInboundHandler} in the {@link ChannelPipeline}.
      */
+    //通过字节码动态生成matcher类，来检测channelRead0接受的参数类型
     public boolean acceptInboundMessage(Object msg) throws Exception {
         return matcher.match(msg);
     }
-
+//这里面的msg需要支持ReferenceCountUtil来自动释放
+//所以channelRead0所接受的类型需要支持引用计数
+//直接用ChannelInboundHandlerAdapter的话，就没有相关类型检测和自动计数要求，但是要手动处理释放问题
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         boolean release = true;

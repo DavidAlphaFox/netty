@@ -118,19 +118,21 @@ final class DefaultChannelPipeline implements ChannelPipeline {
     public ChannelPipeline addLast(String name, ChannelHandler handler) {
         return addLast(null, name, handler);
     }
-
+//在一个pipleline上添加handler是线程安全的
     @Override
     public ChannelPipeline addLast(EventExecutorGroup group, final String name, ChannelHandler handler) {
         synchronized (this) {
             checkDuplicateName(name);
-
+            //DefaultChannelHandlerContext除了判断inbound和outbound
+            //剩下的操作全部是AbstractChannelHandlerContext实现的
             AbstractChannelHandlerContext newCtx = new DefaultChannelHandlerContext(this, group, name, handler);
             addLast0(name, newCtx);
         }
 
         return this;
     }
-
+//从整个pipleline来看，只有channel是不变的
+//Context是和handler一一对应的，也就是每一个handler都有自己的context，而不是一个context走到尾
     private void addLast0(final String name, AbstractChannelHandlerContext newCtx) {
         checkMultiplicity(newCtx);
 
@@ -784,12 +786,14 @@ final class DefaultChannelPipeline implements ChannelPipeline {
 
     @Override
     public ChannelPipeline fireChannelRead(Object msg) {
+        //从默认的头context开始fireChannelRead
         head.fireChannelRead(msg);
         return this;
     }
 
     @Override
     public ChannelPipeline fireChannelReadComplete() {
+        //头节点
         head.fireChannelReadComplete();
         if (channel.config().isAutoRead()) {
             read();
