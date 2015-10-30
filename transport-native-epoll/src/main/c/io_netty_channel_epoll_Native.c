@@ -33,6 +33,9 @@
 
 // optional
 extern int accept4(int sockFd, struct sockaddr *addr, socklen_t *addrlen, int flags) __attribute__((weak));
+//该函数需要在Linux 2.6.27 glibc 2.9 以上使用
+//epoll_create1提供了close-on-exec标记
+//也就是说，在派生新的进程后，会关闭相关句柄
 extern int epoll_create1(int flags) __attribute__((weak));
 
 #ifdef IO_NETTY_SENDMMSG_NOT_FOUND
@@ -504,7 +507,9 @@ void JNI_OnUnload(JavaVM *vm, void *reserved) {
         }
     }
 }
-
+//直接使用eventfd来创建唤醒socket
+//而非用selector的wakeup来唤醒selector，这个需要去JVM中一探究竟
+//eventfd比pipe有优化
 JNIEXPORT jint JNICALL Java_io_netty_channel_epoll_Native_eventFd(JNIEnv * env, jclass clazz) {
     jint eventFD =  eventfd(0, EFD_CLOEXEC | EFD_NONBLOCK);
 
@@ -532,7 +537,7 @@ JNIEXPORT void JNICALL Java_io_netty_channel_epoll_Native_eventFdRead(JNIEnv * e
         throwRuntimeException(env, "Error calling eventfd_read(...)");
     }
 }
-
+// 直接创建一个epoll实例
 JNIEXPORT jint JNICALL Java_io_netty_channel_epoll_Native_epollCreate(JNIEnv * env, jclass clazz) {
     jint efd;
     if (epoll_create1) {
@@ -550,6 +555,7 @@ JNIEXPORT jint JNICALL Java_io_netty_channel_epoll_Native_epollCreate(JNIEnv * e
         }
         return efd;
     }
+    //如果没有epoll_create1，那么需要手动设置close-on-exec
     if (!epoll_create1) {
         if (fcntl(efd, F_SETFD, FD_CLOEXEC) < 0) {
             int err = errno;
@@ -908,7 +914,7 @@ JNIEXPORT jlong JNICALL Java_io_netty_channel_epoll_Native_writevAddresses(JNIEn
     struct iovec * iov = (struct iovec *) memoryAddress;
     return writev0(env, clazz, fd, iov, length);
 }
-
+//封装读取
 jint read0(JNIEnv * env, jclass clazz, jint fd, void *buffer, jint pos, jint limit) {
     ssize_t res;
     int err;

@@ -96,7 +96,7 @@ public final class EpollSocketChannel extends AbstractEpollChannel implements So
     protected SocketAddress remoteAddress0() {
         return remote;
     }
-
+//绑定地址
     @Override
     protected void doBind(SocketAddress local) throws Exception {
         InetSocketAddress localAddress = (InetSocketAddress) local;
