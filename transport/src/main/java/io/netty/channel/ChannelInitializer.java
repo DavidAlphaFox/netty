@@ -71,6 +71,8 @@ public abstract class ChannelInitializer<C extends Channel> extends ChannelInbou
         boolean success = false;
         try {
             initChannel((C) ctx.channel());
+            //初始化成功后，将自己从pipe上移除掉
+            //然后继续传播事件
             pipeline.remove(this);
             ctx.fireChannelRegistered();
             success = true;

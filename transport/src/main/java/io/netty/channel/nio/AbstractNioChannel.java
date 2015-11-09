@@ -321,7 +321,8 @@ public abstract class AbstractNioChannel extends AbstractChannel {
     protected boolean isCompatible(EventLoop loop) {
         return loop instanceof NioEventLoop;
     }
-
+    //直接向当前的eventloop注册自己
+    //如果不成功会一直尝试
     @Override
     protected void doRegister() throws Exception {
         boolean selected = false;

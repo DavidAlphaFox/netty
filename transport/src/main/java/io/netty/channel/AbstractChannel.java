@@ -401,7 +401,9 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
         public final SocketAddress remoteAddress() {
             return remoteAddress0();
         }
-
+        //注册到eventloop上
+        //这个是从SingleThreadEventLoop调用到此处的
+        //此时是线程安全的
         @Override
         public final void register(EventLoop eventLoop, final ChannelPromise promise) {
             if (eventLoop == null) {
@@ -449,6 +451,8 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
                 }
                 doRegister();
                 registered = true;
+                //promise被设置
+                //promise的触发是先于Initializer的
                 safeSetSuccess(promise);
                 //当ChannelInitializer被调用的时候
                 //这个Channel已经在子EventLoop上了

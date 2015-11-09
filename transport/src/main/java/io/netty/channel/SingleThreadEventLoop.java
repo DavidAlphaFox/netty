@@ -47,7 +47,9 @@ public abstract class SingleThreadEventLoop extends SingleThreadEventExecutor im
     public ChannelFuture register(Channel channel) {
         return register(channel, new DefaultChannelPromise(channel, this));
     }
-
+    //当一个Channel被放到Eventloop上的时候
+    //调用EventLoopGroup的register会调用Channel中unsafe的register
+    //
     @Override
     public ChannelFuture register(final Channel channel, final ChannelPromise promise) {
         if (channel == null) {

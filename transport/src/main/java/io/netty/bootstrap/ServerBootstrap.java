@@ -256,6 +256,9 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
             //尝试在子Group上注册
             //不成功直接关掉
             try {
+                //此处register后产生的promise已经被触发了
+                //实际上这个ChannelFutureListener是在ChannelInitializer
+                //执行后才被执行的
                 childGroup.register(child).addListener(new ChannelFutureListener() {
                     @Override
                     public void operationComplete(ChannelFuture future) throws Exception {
