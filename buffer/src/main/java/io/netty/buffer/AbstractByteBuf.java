@@ -873,7 +873,7 @@ public abstract class AbstractByteBuf extends ByteBuf {
         }
         return writtenBytes;
     }
-
+//SocketChannel默认调用该函数
     @Override
     public int writeBytes(ScatteringByteChannel in, int length) throws IOException {
         ensureAccessible();

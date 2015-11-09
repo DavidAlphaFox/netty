@@ -31,6 +31,9 @@ import java.nio.channels.ScatteringByteChannel;
  * and {@link Unpooled#wrappedBuffer(ByteBuffer)} instead of calling the
  * constructor explicitly.
  */
+//使用-XX:+DisableExplicitGC时，DirectBuffer在极端的情况下会引起OutOfMemory
+//因为只有在full gc的时候，才会进行DirectBuffer的回收
+//可以使用-XX:MaxDirectMemorySize来进行指定DirectBuffer
 public class UnpooledUnsafeDirectByteBuf extends AbstractReferenceCountedByteBuf {
 
     private static final boolean NATIVE_ORDER = ByteOrder.nativeOrder() == ByteOrder.BIG_ENDIAN;
@@ -104,6 +107,7 @@ public class UnpooledUnsafeDirectByteBuf extends AbstractReferenceCountedByteBuf
     /**
      * Allocate a new direct {@link ByteBuffer} with the given initialCapacity.
      */
+    //直接使用JVM的内部函数，从DirectBuffer中分配一块内存
     protected ByteBuffer allocateDirect(int initialCapacity) {
         return ByteBuffer.allocateDirect(initialCapacity);
     }
@@ -126,6 +130,7 @@ public class UnpooledUnsafeDirectByteBuf extends AbstractReferenceCountedByteBuf
         }
 
         this.buffer = buffer;
+        //和UnpooledDirectByteufer的最大区别
         memoryAddress = PlatformDependent.directBufferAddress(buffer);
         tmpNioBuf = null;
         capacity = buffer.remaining();
@@ -254,7 +259,7 @@ public class UnpooledUnsafeDirectByteBuf extends AbstractReferenceCountedByteBuf
         if (dstIndex < 0 || dstIndex > dst.capacity() - length) {
             throw new IndexOutOfBoundsException("dstIndex: " + dstIndex);
         }
-
+//内存直接对着复制
         if (dst.hasMemoryAddress()) {
             PlatformDependent.copyMemory(addr(index), dst.memoryAddress() + dstIndex, length);
         } else if (dst.hasArray()) {

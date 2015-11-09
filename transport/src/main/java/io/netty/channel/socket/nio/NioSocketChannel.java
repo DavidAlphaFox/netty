@@ -45,7 +45,7 @@ import java.nio.channels.spi.SelectorProvider;
 // NioSocketChannel 继承的是AbstractNioByteChannel
 // 默认也是DefaultChannelPipeline作为pipeline
 public class NioSocketChannel extends AbstractNioByteChannel implements io.netty.channel.socket.SocketChannel {
-
+    //保存Channel的元信息，内部最重要的是是否已经断开链接了
     private static final ChannelMetadata METADATA = new ChannelMetadata(false);
     private static final SelectorProvider DEFAULT_SELECTOR_PROVIDER = SelectorProvider.provider();
 

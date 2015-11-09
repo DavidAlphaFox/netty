@@ -299,11 +299,13 @@ final class PooledDirectByteBuf extends PooledByteBuf<ByteBuffer> {
         tmpBuf.put(tmp, 0, readBytes);
         return readBytes;
     }
-
+//从SocketChannel中读取数据
     @Override
     public int setBytes(int index, ScatteringByteChannel in, int length) throws IOException {
         checkIndex(index, length);
+        //创建Sun的NioBuffer
         ByteBuffer tmpBuf = internalNioBuffer();
+        //计算出相应的位置
         index = idx(index);
         tmpBuf.clear().position(index).limit(index + length);
         try {

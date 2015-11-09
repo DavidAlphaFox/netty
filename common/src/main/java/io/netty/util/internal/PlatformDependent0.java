@@ -54,6 +54,9 @@ final class PlatformDependent0 {
     private static final boolean UNALIGNED;
 
     static {
+        //先判断是否需要内存对齐
+        //堆上的Buffer的Address必须是0
+        //directBuffer的Address必须不是0
         ByteBuffer direct = ByteBuffer.allocateDirect(1);
         Field addressField;
         try {
@@ -288,7 +291,7 @@ final class PlatformDependent0 {
             putByte(address, (byte) value);
         }
     }
-
+//内存直接复制
     static void copyMemory(long srcAddr, long dstAddr, long length) {
         //UNSAFE.copyMemory(srcAddr, dstAddr, length);
         while (length > 0) {
@@ -299,7 +302,7 @@ final class PlatformDependent0 {
             dstAddr += size;
         }
     }
-
+//内存对数组的复制
     static void copyMemory(Object src, long srcOffset, Object dst, long dstOffset, long length) {
         //UNSAFE.copyMemory(src, srcOffset, dst, dstOffset, length);
         while (length > 0) {

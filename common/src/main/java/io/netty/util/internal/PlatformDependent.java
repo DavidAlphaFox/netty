@@ -606,6 +606,7 @@ public final class PlatformDependent {
         }
 
         try {
+            //看unsafe类是否存在
             boolean hasUnsafe = PlatformDependent0.hasUnsafe();
             logger.debug("sun.misc.Unsafe: {}", hasUnsafe ? "available" : "unavailable");
             return hasUnsafe;

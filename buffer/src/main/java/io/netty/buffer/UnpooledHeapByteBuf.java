@@ -41,6 +41,7 @@ public class UnpooledHeapByteBuf extends AbstractReferenceCountedByteBuf {
      * @param initialCapacity the initial capacity of the underlying byte array
      * @param maxCapacity the max capacity of the underlying byte array
      */
+    //从堆上分配，直接分配的是byte数组
     protected UnpooledHeapByteBuf(ByteBufAllocator alloc, int initialCapacity, int maxCapacity) {
         this(alloc, new byte[initialCapacity], 0, 0, maxCapacity);
     }
