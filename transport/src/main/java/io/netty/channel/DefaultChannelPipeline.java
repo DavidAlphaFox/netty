@@ -65,7 +65,7 @@ final class DefaultChannelPipeline implements ChannelPipeline {
 
     final Map<EventExecutorGroup, EventExecutor> childExecutors =
             new IdentityHashMap<EventExecutorGroup, EventExecutor>();
-
+// 初始化的时候会将channel传进来
     public DefaultChannelPipeline(AbstractChannel channel) {
         if (channel == null) {
             throw new NullPointerException("channel");

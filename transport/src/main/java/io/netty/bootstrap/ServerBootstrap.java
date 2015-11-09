@@ -284,6 +284,11 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
                 // stop accept new connections for 1 second to allow the channel to recover
                 // See https://github.com/netty/netty/issues/1328
                 config.setAutoRead(false);
+                //我不认为这样处理Too many open files异常是个好方法
+                //我的想法是，我们先开一个句柄，如果出现了超出限制数量的file handler
+                //我们关闭先前打开的句柄，让accept成功，然后再关掉链接成功的句柄
+                //然后重新打开先前的句柄
+                //为了解决这个问题，我们似乎需要自定义一个handler来完成这件事情
                 ctx.channel().eventLoop().schedule(new Runnable() {
                     @Override
                     public void run() {
