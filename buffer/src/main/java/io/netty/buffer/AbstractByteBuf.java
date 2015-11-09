@@ -66,7 +66,7 @@ public abstract class AbstractByteBuf extends ByteBuf {
     public int readerIndex() {
         return readerIndex;
     }
-
+//设置ByteBuf的ReaderIndex位置
     @Override
     public ByteBuf readerIndex(int readerIndex) {
         if (readerIndex < 0 || readerIndex > writerIndex) {
@@ -151,7 +151,7 @@ public abstract class AbstractByteBuf extends ByteBuf {
         markedReaderIndex = readerIndex;
         return this;
     }
-
+// Mark一次可以多次进行reset
     @Override
     public ByteBuf resetReaderIndex() {
         readerIndex(markedReaderIndex);
