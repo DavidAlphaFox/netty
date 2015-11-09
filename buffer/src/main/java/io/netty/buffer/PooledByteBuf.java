@@ -135,7 +135,9 @@ abstract class PooledByteBuf<T> extends AbstractReferenceCountedByteBuf {
     }
 
     protected abstract ByteBuffer newInternalNioBuffer(T memory);
-
+//当Buffer的refCnt为1的时候
+//触发deallocate
+//当handle不为负值时，进行回收
     @Override
     protected final void deallocate() {
         if (handle >= 0) {
@@ -148,7 +150,7 @@ abstract class PooledByteBuf<T> extends AbstractReferenceCountedByteBuf {
             recycle();
         }
     }
-
+//进行回收的时候会触发该段代码
     private void recycle() {
         Recycler.Handle recyclerHandle = this.recyclerHandle;
         if (recyclerHandle != null) {

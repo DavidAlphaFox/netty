@@ -145,7 +145,7 @@ public class FastThreadLocal<V> {
         if (v != InternalThreadLocalMap.UNSET) {
             return (V) v;
         }
-
+        //在第一次get的时候进行初始化
         return initialize(threadLocalMap);
     }
 

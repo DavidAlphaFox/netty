@@ -147,6 +147,7 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator {
     public PooledByteBufAllocator(boolean preferDirect, int nHeapArena, int nDirectArena, int pageSize, int maxOrder,
                                   int tinyCacheSize, int smallCacheSize, int normalCacheSize) {
         super(preferDirect);
+        //线程缓存
         threadCache = new PoolThreadLocalCache();
         this.tinyCacheSize = tinyCacheSize;
         this.smallCacheSize = smallCacheSize;
@@ -227,6 +228,7 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator {
 
     @Override
     protected ByteBuf newHeapBuffer(int initialCapacity, int maxCapacity) {
+        //从当前的Thread的线程局部变量中拿出Cache来
         PoolThreadCache cache = threadCache.get();
         PoolArena<byte[]> heapArena = cache.heapArena;
 
@@ -289,7 +291,8 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator {
             final int idx = index.getAndIncrement();
             final PoolArena<byte[]> heapArena;
             final PoolArena<ByteBuffer> directArena;
-
+            //从下面的代码我们可以看出
+            //存在一个Arenas被多个线程使用的情况
             if (heapArenas != null) {
                 heapArena = heapArenas[Math.abs(idx % heapArenas.length)];
             } else {

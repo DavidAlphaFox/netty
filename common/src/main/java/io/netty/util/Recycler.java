@@ -77,6 +77,9 @@ public abstract class Recycler<T> {
 
     @SuppressWarnings("unchecked")
     public final T get() {
+        //拿出线程的Stack
+        //从里面pop出来一个Handler
+        //如果时空的化，就产生一个新的Handler和Object
         Stack<T> stack = threadLocal.get();
         DefaultHandle handle = stack.pop();
         if (handle == null) {
@@ -116,7 +119,9 @@ public abstract class Recycler<T> {
         DefaultHandle(Stack<?> stack) {
             this.stack = stack;
         }
-
+        //当我们调用回收的时候
+        //先确认我们当前的线程是否是初始化时Stack的线程相同
+        //如果相同，就放回去
         public void recycle() {
             Thread thread = Thread.currentThread();
             if (thread == stack.thread) {
@@ -126,6 +131,8 @@ public abstract class Recycler<T> {
             // we don't want to have a ref to the queue as the value in our weak map
             // so we null it out; to ensure there are no races with restoring it later
             // we impose a memory ordering here (no-op on x86)
+            //如果线程不同，那么只能放入DELAYED_RECYCLED中
+            //但是DELAYED_RECYCLED需要如何回收呢？
             Map<Stack<?>, WeakOrderQueue> delayedRecycled = DELAYED_RECYCLED.get();
             WeakOrderQueue queue = delayedRecycled.get(stack);
             if (queue == null) {
@@ -134,7 +141,9 @@ public abstract class Recycler<T> {
             queue.add(this);
         }
     }
-
+//猜测是利用WeakHashMap的特性来回收资源
+//这样的话，只要是PooledByteBuf只在Netty的线程中传递，还是有机会回收的
+//只不过是不会归还到相应的线程的池子中
     private static final FastThreadLocal<Map<Stack<?>, WeakOrderQueue>> DELAYED_RECYCLED =
             new FastThreadLocal<Map<Stack<?>, WeakOrderQueue>>() {
         @Override
