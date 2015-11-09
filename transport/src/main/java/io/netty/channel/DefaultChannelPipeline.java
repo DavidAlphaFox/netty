@@ -104,6 +104,7 @@ final class DefaultChannelPipeline implements ChannelPipeline {
         checkMultiplicity(newCtx);
 
         AbstractChannelHandlerContext nextCtx = head.next;
+        //永远保持pipeline的Head是默认的
         newCtx.prev = head;
         newCtx.next = nextCtx;
         head.next = newCtx;
@@ -135,13 +136,14 @@ final class DefaultChannelPipeline implements ChannelPipeline {
 //Context是和handler一一对应的，也就是每一个handler都有自己的context，而不是一个context走到尾
     private void addLast0(final String name, AbstractChannelHandlerContext newCtx) {
         checkMultiplicity(newCtx);
-
+        //取尾节点之前的那个节点
         AbstractChannelHandlerContext prev = tail.prev;
+        //永远保持pipeline的Tail是默认的
         newCtx.prev = prev;
         newCtx.next = tail;
         prev.next = newCtx;
         tail.prev = newCtx;
-
+        //放入hash表中
         name2ctx.put(name, newCtx);
 
         callHandlerAdded(newCtx);
@@ -783,14 +785,14 @@ final class DefaultChannelPipeline implements ChannelPipeline {
         head.fireUserEventTriggered(event);
         return this;
     }
-
+ //从默认的头context开始fireChannelRead
     @Override
     public ChannelPipeline fireChannelRead(Object msg) {
-        //从默认的头context开始fireChannelRead
+
         head.fireChannelRead(msg);
         return this;
     }
-
+//直接调用头节点
     @Override
     public ChannelPipeline fireChannelReadComplete() {
         //头节点
@@ -931,7 +933,9 @@ final class DefaultChannelPipeline implements ChannelPipeline {
             return ctx;
         }
     }
-
+//默认的TailContext
+//TailContext默认是向内读的InboundHandler
+//主要的作用减少Msg的引用计数
     // A special catch-all handler that handles both bytes and messages.
     static final class TailContext extends AbstractChannelHandlerContext implements ChannelInboundHandler {
 
@@ -991,7 +995,9 @@ final class DefaultChannelPipeline implements ChannelPipeline {
         @Override
         public void channelReadComplete(ChannelHandlerContext ctx) throws Exception { }
     }
-
+//默认的HeadContext
+//HeadContext默认是向外写的OutboundHandler
+//内部的操作是通过相应平台的unsafe来完成的
     static final class HeadContext extends AbstractChannelHandlerContext implements ChannelOutboundHandler {
 
         private static final String HEAD_NAME = generateName0(HeadContext.class);

@@ -42,6 +42,8 @@ import java.nio.channels.spi.SelectorProvider;
 /**
  * {@link io.netty.channel.socket.SocketChannel} which uses NIO selector based implementation.
  */
+// NioSocketChannel 继承的是AbstractNioByteChannel
+// 默认也是DefaultChannelPipeline作为pipeline
 public class NioSocketChannel extends AbstractNioByteChannel implements io.netty.channel.socket.SocketChannel {
 
     private static final ChannelMetadata METADATA = new ChannelMetadata(false);

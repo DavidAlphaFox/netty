@@ -315,6 +315,9 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap impleme
         //找到下一个inbound的channel handler
         //如果这个handler和当前的handler不在同一个线程中，需要做线程变换操作
         final AbstractChannelHandlerContext next = findContextInbound();
+        //检查AbstractChannelHandlerContext是否在当前的EventExecutor上
+        //如果在直接执行消息，如果不再，则直接放到目标EventExecutor上
+        //当作一个OneTimeTask去执行
         EventExecutor executor = next.executor();
         if (executor.inEventLoop()) {
             next.invokeChannelRead(msg);
@@ -851,7 +854,7 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap impleme
         }
         return true;
     }
-
+//从头开始遍历，找到第一个Inbound的ChannelCtx
     private AbstractChannelHandlerContext findContextInbound() {
         AbstractChannelHandlerContext ctx = this;
         do {

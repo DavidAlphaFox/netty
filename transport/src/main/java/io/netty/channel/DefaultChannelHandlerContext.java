@@ -16,7 +16,8 @@
 package io.netty.channel;
 
 import io.netty.util.concurrent.EventExecutorGroup;
-
+//将ChannelHandler进行一层包装
+//这样才能放到pipeline上
 final class DefaultChannelHandlerContext extends AbstractChannelHandlerContext {
 
     private final ChannelHandler handler;

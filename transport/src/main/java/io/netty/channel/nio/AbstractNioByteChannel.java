@@ -48,10 +48,10 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
      * @param parent            the parent {@link Channel} by which this instance was created. May be {@code null}
      * @param ch                the underlying {@link SelectableChannel} on which it operates
      */
+    //默认开启读
     protected AbstractNioByteChannel(Channel parent, SelectableChannel ch) {
         super(parent, ch, SelectionKey.OP_READ);
     }
-
     @Override
     protected AbstractNioUnsafe newUnsafe() {
         return new NioByteUnsafe();
@@ -104,6 +104,9 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
 
             final ChannelPipeline pipeline = pipeline();
             //默认情况下使用UnpooledByteBufAllocator
+            //需要注意的是，PooledByteBufAllocator是和线程有关的
+            //因为PooledByteBufAllocator使用了线程局部存储，所以是不能跨越线程分配和释放的
+            //否则会出现严重的内存问题
             final ByteBufAllocator allocator = config.getAllocator();
             final int maxMessagesPerRead = config.getMaxMessagesPerRead();
             RecvByteBufAllocator.Handle allocHandle = this.allocHandle;

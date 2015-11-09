@@ -65,6 +65,8 @@ public final class ReferenceCountUtil {
      * Try to call {@link ReferenceCounted#release(int)} if the specified message implements {@link ReferenceCounted}.
      * If the specified message doesn't implement {@link ReferenceCounted}, this method does nothing.
      */
+    //判断是否是ReferenceCounted的类族
+    //如果是就释放
     public static boolean release(Object msg, int decrement) {
         if (msg instanceof ReferenceCounted) {
             return ((ReferenceCounted) msg).release(decrement);

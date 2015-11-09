@@ -38,6 +38,8 @@ import java.util.List;
  * A {@link io.netty.channel.socket.ServerSocketChannel} implementation which uses
  * NIO selector based implementation to accept new connections.
  */
+//Server继承的是AbstractNioMessageChannel
+//使用DefaultChannelPipeline来做pipeline
 public class NioServerSocketChannel extends AbstractNioMessageChannel
                              implements io.netty.channel.socket.ServerSocketChannel {
 
@@ -132,6 +134,7 @@ public class NioServerSocketChannel extends AbstractNioMessageChannel
 
     //此处进行了accept之后fire到default的pipleline中了
     //由NioMessageUnsafe.read触发
+    //返回读取的数量
     @Override
     protected int doReadMessages(List<Object> buf) throws Exception {
         SocketChannel ch = javaChannel().accept();

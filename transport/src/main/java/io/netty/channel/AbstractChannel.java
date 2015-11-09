@@ -38,6 +38,8 @@ import java.util.concurrent.RejectedExecutionException;
 /**
  * A skeletal {@link Channel} implementation.
  */
+//实现Channel
+//并且继承DefaultAttributeMap，这样Channel对象就可以附加额外的用户数据
 public abstract class AbstractChannel extends DefaultAttributeMap implements Channel {
 
     private static final InternalLogger logger = InternalLoggerFactory.getInstance(AbstractChannel.class);

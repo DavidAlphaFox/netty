@@ -44,6 +44,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Abstract base class for {@link Channel} implementations which use a Selector based approach.
  */
+// 不管是Server还是Clinet都基础类都来自AbstractNioChannel
 public abstract class AbstractNioChannel extends AbstractChannel {
 
     private static final InternalLogger logger =
@@ -75,6 +76,7 @@ public abstract class AbstractNioChannel extends AbstractChannel {
         this.ch = ch;
         this.readInterestOp = readInterestOp;
         try {
+            //让Channel成为非阻塞的
             ch.configureBlocking(false);
         } catch (IOException e) {
             try {

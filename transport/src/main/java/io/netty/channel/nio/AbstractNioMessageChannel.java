@@ -53,6 +53,8 @@ public abstract class AbstractNioMessageChannel extends AbstractNioChannel {
         public void read() {
             assert eventLoop().inEventLoop();
             final ChannelConfig config = config();
+            // 不再是AutoRead并且不在ReadPending的时候
+            // 需要去掉该socket的读事件
             if (!config.isAutoRead() && !isReadPending()) {
                 // ChannelConfig.setAutoRead(false) was called in the meantime
                 removeReadOp();
@@ -87,12 +89,13 @@ public abstract class AbstractNioMessageChannel extends AbstractNioChannel {
                 } catch (Throwable t) {
                     exception = t;
                 }
+                //表示自己已经不处在ReadPending
                 setReadPending(false);
                 int size = readBuf.size();
                 for (int i = 0; i < size; i ++) {
                     pipeline.fireChannelRead(readBuf.get(i));
                 }
-
+                //整个pipeline处理完后，直接清空buffer
                 readBuf.clear();
                 pipeline.fireChannelReadComplete();
 

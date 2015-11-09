@@ -55,6 +55,8 @@ public abstract class ChannelHandlerAdapter implements ChannelHandler {
     /**
      * Do nothing by default, sub-classes may override this method.
      */
+    //在handler被加入到pipeline的时候，会被调用一次
+    //并且调用该函数的时候，我们已经在目标线程上了
     @Override
     public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
         // NOOP
