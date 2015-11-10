@@ -67,10 +67,12 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
             SelectionKey key = selectionKey();
             setInputShutdown();
             if (isOpen()) {
+                //如果准许half_close的话，触发一个ChannelInputShutdownEvent
                 if (Boolean.TRUE.equals(config().getOption(ChannelOption.ALLOW_HALF_CLOSURE))) {
                     key.interestOps(key.interestOps() & ~readInterestOp);
                     pipeline.fireUserEventTriggered(ChannelInputShutdownEvent.INSTANCE);
                 } else {
+                    //否则进行关闭
                     close(voidPromise());
                 }
             }
@@ -92,7 +94,9 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
                 closeOnRead(pipeline);
             }
         }
-
+        // 我们可以看出Channel在一次收取数据的时候
+        // 可能会触发多次ChannelRead事件
+        // 但是只会触发一次ChannelReadComplete
         @Override
         public void read() {
             final ChannelConfig config = config();
@@ -110,6 +114,8 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
 
             //先获得ByteBufAllocator
             final ByteBufAllocator allocator = config.getAllocator();
+            //我们可以通过配置，一次读循环，最多读取多少次
+            //默认次数是16
             final int maxMessagesPerRead = config.getMaxMessagesPerRead();
             RecvByteBufAllocator.Handle allocHandle = this.allocHandle;
             if (allocHandle == null) {
@@ -124,8 +130,12 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
                 boolean readPendingReset = false;
                 do {
                     byteBuf = allocHandle.allocate(allocator);
+                    //获得当前byteBuf可以写入的数据量
                     int writable = byteBuf.writableBytes();
+                    //从Channel上接收数据
                     int localReadAmount = doReadBytes(byteBuf);
+                    //读取的量是负数，说明这个Channel已经Close了
+                    //我们可以直接结束处理流程了
                     if (localReadAmount <= 0) {
                         // not was read release the buffer
                         byteBuf.release();
@@ -136,9 +146,10 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
                         readPendingReset = true;
                         setReadPending(false);
                     }
+                    //每次读取都要Fire一次ChannelRead
                     pipeline.fireChannelRead(byteBuf);
                     byteBuf = null;
-
+                    //读取到ByteBuf的最大量了，结束掉读取
                     if (totalReadAmount >= Integer.MAX_VALUE - localReadAmount) {
                         // Avoid overflow.
                         totalReadAmount = Integer.MAX_VALUE;
@@ -148,18 +159,22 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
                     totalReadAmount += localReadAmount;
 
                     // stop reading
+                    //我们可以通过控制autoRead进行流控
                     if (!config.isAutoRead()) {
                         break;
                     }
-
+                    // 默认我们应当收1024字节的数据
+                    // 如果我们一次没有接收够1024直接结束
                     if (localReadAmount < writable) {
                         // Read less than what the buffer can hold,
                         // which might mean we drained the recv buffer completely.
                         break;
                     }
                 } while (++ messages < maxMessagesPerRead);
-
+                //不管是否是Close都会Fire一次ReadComplete
                 pipeline.fireChannelReadComplete();
+                //纪录本次在Channel上一共收取了多少数据
+                //为下次数据收取时分配内存提供一个参考
                 allocHandle.record(totalReadAmount);
 
                 if (close) {

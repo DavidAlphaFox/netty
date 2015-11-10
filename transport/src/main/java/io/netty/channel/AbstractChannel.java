@@ -40,6 +40,7 @@ import java.util.concurrent.RejectedExecutionException;
  */
 //实现Channel
 //并且继承DefaultAttributeMap，这样Channel对象就可以附加额外的用户数据
+//从这里我们可以看到，当一个Channel被关闭的时候，先Fire的是ChannelInactive然后是ChannelUnregistered
 public abstract class AbstractChannel extends DefaultAttributeMap implements Channel {
 
     private static final InternalLogger logger = InternalLoggerFactory.getInstance(AbstractChannel.class);
@@ -538,10 +539,11 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
 
         @Override
         public final void close(final ChannelPromise promise) {
+            //保证Promise是不能Cancel的
             if (!promise.setUncancellable()) {
                 return;
             }
-
+            //如果处在数据发送的最后阶段，将关闭操作退后
             if (inFlush0) {
                 invokeLater(new OneTimeTask() {
                     @Override
@@ -551,7 +553,8 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
                 });
                 return;
             }
-
+            //如果已经发生了close事件
+            //我们可以让Promise直接成功
             if (closeFuture.isDone()) {
                 // Closed already.
                 safeSetSuccess(promise);
@@ -563,7 +566,10 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
             this.outboundBuffer = null; // Disallow adding any messages and flushes to outboundBuffer.
 
             try {
+                //交由具体子类进行关闭
                 doClose();
+                //设置closeFuture
+                //closeFuture就是一个Promise
                 closeFuture.setClosed();
                 safeSetSuccess(promise);
             } catch (Throwable t) {
@@ -576,6 +582,9 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
                 outboundBuffer.failFlushed(CLOSED_CHANNEL_EXCEPTION);
                 outboundBuffer.close(CLOSED_CHANNEL_EXCEPTION);
             } finally {
+                //如果Channel过去是Active的
+                //现在已经不是Active的，稍后Fire一个ChannelInactive
+                //让用户知道这个Channel已经关闭了
 
                 if (wasActive && !isActive()) {
                     invokeLater(new OneTimeTask() {
@@ -611,12 +620,15 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
             }
 
             try {
+                //让自己从Selector上进行移除
                 doDeregister();
             } catch (Throwable t) {
                 logger.warn("Unexpected exception occurred while deregistering a channel.", t);
             } finally {
                 if (registered) {
                     registered = false;
+                    // 如果是曾经注册过
+                    // 那么稍后要Fire一个ChannelUnregistered
                     invokeLater(new OneTimeTask() {
                         @Override
                         public void run() {

@@ -46,10 +46,12 @@ public class AdaptiveRecvByteBufAllocator implements RecvByteBufAllocator {
 
     static {
         List<Integer> sizeTable = new ArrayList<Integer>();
+        //每16字节进行一次跃进，一共31个
         for (int i = 16; i < 512; i += 16) {
             sizeTable.add(i);
         }
-
+        //从512开始，直到整数溢出,此次以倍乘的方式
+        //512,1024,2048,4096
         for (int i = 512; i > 0; i <<= 1) {
             sizeTable.add(i);
         }
