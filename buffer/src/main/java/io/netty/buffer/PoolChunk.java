@@ -101,6 +101,19 @@ package io.netty.buffer;
  * the second value (i.e, x) indicates that the first node which is free to be allocated is at depth x (from root)
  */
 
+/*
+*  我们定义page是一堆可以分配的内存区域
+*  我们定义chunk是page的集合体
+*  我们定义chunkSize = 2^{maxOrder} * pageSize
+*
+*  一开始我们申请一个chunkSize的byte array
+*  如果每次有请求的时候，我们找到第一个合适的内存返回去
+*  返回的结果是一个long值，是offset的编码
+*  总体来看是使用位图的方式，控制资源分配
+*
+*
+*/
+
 final class PoolChunk<T> {
 
     final PoolArena<T> arena;

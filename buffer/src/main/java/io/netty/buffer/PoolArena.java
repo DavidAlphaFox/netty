@@ -21,6 +21,7 @@ import io.netty.util.internal.StringUtil;
 
 import java.nio.ByteBuffer;
 
+//一个Areana下面有一堆Chunk
 abstract class PoolArena<T> {
 
     static final int numTinySubpagePools = 512 >>> 4;
