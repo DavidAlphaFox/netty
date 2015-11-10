@@ -123,9 +123,11 @@ abstract class PoolArena<T> {
     static boolean isTiny(int normCapacity) {
         return (normCapacity & 0xFFFFFE00) == 0;
     }
-
+//分配一块内存
     private void allocate(PoolThreadCache cache, PooledByteBuf<T> buf, final int reqCapacity) {
+        //将需求的大小进行取整
         final int normCapacity = normalizeCapacity(reqCapacity);
+        //如果是小的内存分配
         if (isTinyOrSmall(normCapacity)) { // capacity < pageSize
             int tableIdx;
             PoolSubpage<T>[] table;
@@ -144,7 +146,7 @@ abstract class PoolArena<T> {
                 tableIdx = smallIdx(normCapacity);
                 table = smallSubpagePools;
             }
-
+            //如果不能从外部分配，尝试从缓存中寻找可用的内存
             synchronized (this) {
                 final PoolSubpage<T> head = table[tableIdx];
                 final PoolSubpage<T> s = head.next;
@@ -407,6 +409,7 @@ abstract class PoolArena<T> {
 
         @Override
         protected PooledByteBuf<byte[]> newByteBuf(int maxCapacity) {
+            //创建一个PooledHeapByteBuf实例
             return PooledHeapByteBuf.newInstance(maxCapacity);
         }
 

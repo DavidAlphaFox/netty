@@ -122,7 +122,7 @@ public abstract class AbstractByteBufAllocator implements ByteBufAllocator {
     public ByteBuf heapBuffer() {
         return heapBuffer(DEFAULT_INITIAL_CAPACITY, Integer.MAX_VALUE);
     }
-
+//直接分配一个buffer出来，下限为initialCapacity，上限为正整数最大值
     @Override
     public ByteBuf heapBuffer(int initialCapacity) {
         return heapBuffer(initialCapacity, Integer.MAX_VALUE);

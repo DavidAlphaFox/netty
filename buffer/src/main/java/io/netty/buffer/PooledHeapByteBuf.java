@@ -35,6 +35,7 @@ final class PooledHeapByteBuf extends PooledByteBuf<byte[]> {
     };
 
     static PooledHeapByteBuf newInstance(int maxCapacity) {
+        //尝试从RECYCLER处得到一个
         PooledHeapByteBuf buf = RECYCLER.get();
         buf.setRefCnt(1);
         buf.maxCapacity(maxCapacity);

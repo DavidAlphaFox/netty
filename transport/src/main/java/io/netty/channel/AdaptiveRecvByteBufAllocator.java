@@ -31,6 +31,8 @@ import java.util.List;
  * amount of the allocated buffer two times consecutively.  Otherwise, it keeps
  * returning the same prediction.
  */
+//默认的数据接收Allocator
+//用来包装pooled或者unpooled的ByteBufAllocator
 public class AdaptiveRecvByteBufAllocator implements RecvByteBufAllocator {
 
     static final int DEFAULT_MINIMUM = 64;
@@ -98,7 +100,7 @@ public class AdaptiveRecvByteBufAllocator implements RecvByteBufAllocator {
             index = getSizeTableIndex(initial);
             nextReceiveBufferSize = SIZE_TABLE[index];
         }
-
+        //调用真正的allocator来完成分配工作
         @Override
         public ByteBuf allocate(ByteBufAllocator alloc) {
             return alloc.ioBuffer(nextReceiveBufferSize);

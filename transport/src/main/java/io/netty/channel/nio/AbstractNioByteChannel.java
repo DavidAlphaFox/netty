@@ -107,6 +107,8 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
             //需要注意的是，PooledByteBufAllocator是和线程有关的
             //因为PooledByteBufAllocator使用了线程局部存储，所以是不能跨越线程分配和释放的
             //否则会出现严重的内存问题
+
+            //先获得ByteBufAllocator
             final ByteBufAllocator allocator = config.getAllocator();
             final int maxMessagesPerRead = config.getMaxMessagesPerRead();
             RecvByteBufAllocator.Handle allocHandle = this.allocHandle;
