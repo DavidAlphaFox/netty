@@ -383,6 +383,8 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
     /**
      * {@link Unsafe} implementation which sub-classes must extend and use.
      */
+    //从这里可以看出，Netty的write只是进行了JVM内的排队，并没有进行真正的写
+    //而flush操作，是将排队的数据真正交付给JVM的Channel向外写数据
     protected abstract class AbstractUnsafe implements Unsafe {
 
         private ChannelOutboundBuffer outboundBuffer = new ChannelOutboundBuffer(AbstractChannel.this);
@@ -663,9 +665,10 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
                 close(voidPromise());
             }
         }
-
+        //所有的Channel在write阶段的unsafe都是一样的
         @Override
         public final void write(Object msg, ChannelPromise promise) {
+            //拿出自己的outboundBuffer
             ChannelOutboundBuffer outboundBuffer = this.outboundBuffer;
             if (outboundBuffer == null) {
                 // If the outboundBuffer is null we know the channel was closed and so
@@ -690,17 +693,17 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
                 ReferenceCountUtil.release(msg);
                 return;
             }
-
+            //把消息放入outboundBuffer进行排队
             outboundBuffer.addMessage(msg, size, promise);
         }
-
+        //pipeline要求进行Flush
         @Override
         public final void flush() {
             ChannelOutboundBuffer outboundBuffer = this.outboundBuffer;
             if (outboundBuffer == null) {
                 return;
             }
-
+            //在outboundBuffer上添加Flush的标记
             outboundBuffer.addFlush();
             flush0();
         }

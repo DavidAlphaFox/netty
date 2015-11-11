@@ -1008,7 +1008,8 @@ final class DefaultChannelPipeline implements ChannelPipeline {
             super(pipeline, null, HEAD_NAME, false, true);
             unsafe = pipeline.channel().unsafe();
         }
-
+        //当AbstractChannelHandlerContext问handler是谁的时候
+        //我们直接返回自己
         @Override
         public ChannelHandler handler() {
             return this;

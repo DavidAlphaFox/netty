@@ -31,6 +31,10 @@ import java.util.List;
 /**
  * {@link AbstractNioChannel} base class for {@link Channel}s that operate on messages.
  */
+//我们需要注意的一个事情
+//AbstractNioMessageChannel和AbstractNioByteChannel的unsafe是不同的
+//read阶段AbstractNioMessageChannel是不会使用配置器的内存分配器来分配Buffer的
+//只是简单建立一个ArrayList，Channel可以按需要使用配置器中的内存分配器来分配Buffer
 public abstract class AbstractNioMessageChannel extends AbstractNioChannel {
 
     /**
@@ -68,6 +72,7 @@ public abstract class AbstractNioMessageChannel extends AbstractNioChannel {
             try {
                 try {
                     for (;;) {
+                        //使用Channel本身的特性进行消息读取
                         int localRead = doReadMessages(readBuf);
                         if (localRead == 0) {
                             break;

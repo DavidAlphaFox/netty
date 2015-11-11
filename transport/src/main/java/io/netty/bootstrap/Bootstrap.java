@@ -173,7 +173,9 @@ public class Bootstrap extends AbstractBootstrap<Bootstrap, Channel> {
             }
         });
     }
-
+//对得到的Channel进行初始化
+//主要是将Bootstrap阶段中的ChannelOption
+//设置到相应的Channel上
     @Override
     @SuppressWarnings("unchecked")
     void init(Channel channel) throws Exception {

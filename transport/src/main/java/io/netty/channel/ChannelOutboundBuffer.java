@@ -45,6 +45,8 @@ import java.util.concurrent.atomic.AtomicLongFieldUpdater;
  * </ul>
  * </p>
  */
+//该类使用了大量的atomic的操作
+//所以不用锁，修改特定变量也是安全的
 public final class ChannelOutboundBuffer {
 
     private static final InternalLogger logger = InternalLoggerFactory.getInstance(ChannelOutboundBuffer.class);

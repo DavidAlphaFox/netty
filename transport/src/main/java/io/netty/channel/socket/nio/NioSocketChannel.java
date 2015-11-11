@@ -238,13 +238,14 @@ public class NioSocketChannel extends AbstractNioByteChannel implements io.netty
         final long position = region.transfered();
         return region.transferTo(javaChannel(), position);
     }
-
+//真正利用Channel特性向外写数据
     @Override
     protected void doWrite(ChannelOutboundBuffer in) throws Exception {
         for (;;) {
             int size = in.size();
             if (size == 0) {
                 // All written so clear OP_WRITE
+                //当所有数据都写完了，我们要清理掉可写的标记
                 clearOpWrite();
                 break;
             }
@@ -253,6 +254,7 @@ public class NioSocketChannel extends AbstractNioByteChannel implements io.netty
             boolean setOpWrite = false;
 
             // Ensure the pending writes are made of ByteBufs only.
+            // 先转化成ByteBuf
             ByteBuffer[] nioBuffers = in.nioBuffers();
             int nioBufferCnt = in.nioBufferCount();
             long expectedWrittenBytes = in.nioBufferSize();
@@ -283,6 +285,7 @@ public class NioSocketChannel extends AbstractNioByteChannel implements io.netty
                     }
                     break;
                 default:
+                    //全力往外写，知道写不动为止
                     for (int i = config().getWriteSpinCount() - 1; i >= 0; i --) {
                         final long localWrittenBytes = ch.write(nioBuffers, 0, nioBufferCnt);
                         if (localWrittenBytes == 0) {
@@ -291,6 +294,8 @@ public class NioSocketChannel extends AbstractNioByteChannel implements io.netty
                         }
                         expectedWrittenBytes -= localWrittenBytes;
                         writtenBytes += localWrittenBytes;
+                        //判断我们是否有没写完的数据
+                        //如果有，我们需要在Selector上注册等待写事件
                         if (expectedWrittenBytes == 0) {
                             done = true;
                             break;

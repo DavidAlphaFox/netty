@@ -270,7 +270,7 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
         }
         return doBind(localAddress);
     }
-    //Server的bootstrap过程
+    //bootstrap过程
     //初始化并注册一个Channel
     private ChannelFuture doBind(final SocketAddress localAddress) {
         final ChannelFuture regFuture = initAndRegister();
@@ -278,10 +278,11 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
         if (regFuture.cause() != null) {
             return regFuture;
         }
-
+        //如果注册阶段没有出现异常
         if (regFuture.isDone()) {
             // At this point we know that the registration was complete and succesful.
             ChannelPromise promise = channel.newPromise();
+            //我们已经注册完成了，让Channel上的Pipeline触发channelRegistered事件
             doBind0(regFuture, channel, localAddress, promise);
             return promise;
         } else {
@@ -310,6 +311,7 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
     //先获取一个Channel
     //然后调用虚函数init来初始化该Channel
     final ChannelFuture initAndRegister() {
+        //得到一个新的Channel
         final Channel channel = channelFactory().newChannel();
         try {
             init(channel);
@@ -318,7 +320,7 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
             // as the Channel is not registered yet we need to force the usage of the GlobalEventExecutor
             return new DefaultChannelPromise(channel, GlobalEventExecutor.INSTANCE).setFailure(t);
         }
-
+        // 向EventLoop注册该Channel，默认是读事件
         ChannelFuture regFuture = group().register(channel);
         if (regFuture.cause() != null) {
             if (channel.isRegistered()) {
@@ -446,7 +448,7 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
         }
         return buf.toString();
     }
-
+//默认的Bootstrap所使用的Factory
     private static final class BootstrapChannelFactory<T extends Channel> implements ChannelFactory<T> {
         private final Class<? extends T> clazz;
 

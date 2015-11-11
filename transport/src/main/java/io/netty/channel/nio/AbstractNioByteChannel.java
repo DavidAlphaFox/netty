@@ -307,6 +307,7 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
 
     protected final void incompleteWrite(boolean setOpWrite) {
         // Did not write completely.
+        // 看是否需要在selector上进行写关注
         if (setOpWrite) {
             setOpWrite();
         } else {

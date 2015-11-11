@@ -640,7 +640,7 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap impleme
     public ChannelFuture write(Object msg) {
         return write(msg, newPromise());
     }
-
+// pipeline要去写
     @Override
     public ChannelFuture write(final Object msg, final ChannelPromise promise) {
         if (msg == null) {
@@ -713,13 +713,15 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap impleme
     }
     //ChannelHandlerContext的write是记录位置的
     //不是从Pipeline的起点开始写
-    //而是直接写入Pipeline当前Handler的下一个Handler
+    //而是直接写入Pipeline当前Handler的上一个Handler
     private void write(Object msg, boolean flush, ChannelPromise promise) {
 
         AbstractChannelHandlerContext next = findContextOutbound();
         EventExecutor executor = next.executor();
         if (executor.inEventLoop()) {
+            //在同一个线程内，立刻进行写操作
             next.invokeWrite(msg, promise);
+            //我们需要flush操作，立刻进行flush操作
             if (flush) {
                 next.invokeFlush();
             }
@@ -940,7 +942,9 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap impleme
         public Runnable value() {
             return this;
         }
-
+        //WriteTask执行的时候，是在Channel所在的EventLoop内
+        //所以可以安全的使用ctx的invokeWrite方法
+        //此时的ctx已经是该Channel的第一个OutboundHandler了
         protected void write(AbstractChannelHandlerContext ctx, Object msg, ChannelPromise promise) {
             ctx.invokeWrite(msg, promise);
         }

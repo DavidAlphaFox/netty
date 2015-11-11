@@ -57,6 +57,8 @@ import java.util.Map;
  * @see AddressedEnvelope
  * @see DatagramPacket
  */
+ // UDP的NIO，和NioServerSocketChannel一样继承自AbstractNioMessageChannel
+ // UDP单包就是一个消息
 public final class NioDatagramChannel
         extends AbstractNioMessageChannel implements io.netty.channel.socket.DatagramChannel {
 
@@ -82,6 +84,7 @@ public final class NioDatagramChannel
              *
              *  See <a href="See https://github.com/netty/netty/issues/2308">#2308</a>.
              */
+        // 直接在Provider上打开一个UDP的channel
             return provider.openDatagramChannel();
         } catch (IOException e) {
             throw new ChannelException("Failed to open a socket.", e);
