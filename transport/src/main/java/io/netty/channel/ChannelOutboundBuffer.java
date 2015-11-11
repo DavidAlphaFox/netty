@@ -47,6 +47,23 @@ import java.util.concurrent.atomic.AtomicLongFieldUpdater;
  */
 //该类使用了大量的atomic的操作
 //所以不用锁，修改特定变量也是安全的
+/*
+ *  flush操作前
+ * unflushedEntry(A) -> B -> C -> tailEntry(D)
+ * flushedEntry = null
+ * flush操作，但是没发送完
+ * flushedEntry(C)->tailEntry(D)
+ * unflushedEntry = null
+ * 写入新数据
+ * flushedEntry(C)->D->unflushedEntry(E)->F->G->tailEntry(H)
+ * 再次进行flush操作
+ * flushedEntry(C)->D->E->F->G->tailEntry(H)
+ * unflushedEntry = null
+ *
+ * 这里使用两个指针，完成发送队列和为发送队列的切换
+ * 同时用flushed这个整形来控制，未发送的数据不会错误的flush掉
+ *
+ */
 public final class ChannelOutboundBuffer {
 
     private static final InternalLogger logger = InternalLoggerFactory.getInstance(ChannelOutboundBuffer.class);
@@ -112,6 +129,7 @@ public final class ChannelOutboundBuffer {
      */
     public void addMessage(Object msg, int size, ChannelPromise promise) {
         Entry entry = Entry.newInstance(msg, size, total(msg), promise);
+        //unflushedEntry到tailEntry间是一个链表
         if (tailEntry == null) {
             flushedEntry = null;
             tailEntry = entry;
@@ -292,6 +310,9 @@ public final class ChannelOutboundBuffer {
     private void removeEntry(Entry e) {
         if (-- flushed == 0) {
             // processed everything
+            // 此处我们需要考虑，当我们进行了一次flush，但是限于网络的吞吐问题
+            // 并没有一次发送成功，然后我们写了一些数据，又进行了一次flush
+            // 这也就说明了前面的addFlush函数发现flushedEntry不空，然后就不需要改
             flushedEntry = null;
             if (e == tailEntry) {
                 tailEntry = null;
