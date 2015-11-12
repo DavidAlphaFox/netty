@@ -94,7 +94,7 @@ final class PoolThreadCache {
             // Create the caches for the heap allocations
             tinySubPageHeapCaches = createSubPageCaches(tinyCacheSize, PoolArena.numTinySubpagePools);
             smallSubPageHeapCaches = createSubPageCaches(smallCacheSize, heapArena.numSmallSubpagePools);
-
+            //8KB的时候为13
             numShiftsNormalHeap = log2(heapArena.pageSize);
             normalHeapCaches = createNormalCaches(
                     normalCacheSize, maxCachedBufferCapacity, heapArena);
@@ -124,7 +124,7 @@ final class PoolThreadCache {
             return null;
         }
     }
-
+// 创建一个Cache区域
     private static <T> NormalMemoryRegionCache<T>[] createNormalCaches(
             int cacheSize, int maxCachedBufferCapacity, PoolArena<T> area) {
         if (cacheSize > 0) {

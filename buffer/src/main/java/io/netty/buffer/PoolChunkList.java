@@ -52,6 +52,8 @@ final class PoolChunkList<T> {
                 }
             } else {
                 cur.initBuf(buf, handle, reqCapacity);
+                //当我们分配了一个buffer出去，我们的最大使用量已经超过这个ChunkList的上限的时候
+                //将这个Buffer放到下一个ChunkList的列表中
                 if (cur.usage() >= maxUsage) {
                     remove(cur);
                     nextList.add(cur);
@@ -73,7 +75,7 @@ final class PoolChunkList<T> {
             }
         }
     }
-
+//Chunk是非循环的双向链表
     void add(PoolChunk<T> chunk) {
         if (chunk.usage() >= maxUsage) {
             nextList.add(chunk);
@@ -92,7 +94,7 @@ final class PoolChunkList<T> {
             head = chunk;
         }
     }
-
+//我们从自身上，移走一个Chunk
     private void remove(PoolChunk<T> cur) {
         if (cur == head) {
             head = cur.next;

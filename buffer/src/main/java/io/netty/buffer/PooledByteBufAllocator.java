@@ -51,6 +51,7 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator {
             pageSizeFallbackCause = t;
             defaultPageSize = 8192;
         }
+        //默认页面大小是8KB
         DEFAULT_PAGE_SIZE = defaultPageSize;
 
         int defaultMaxOrder = SystemPropertyUtil.getInt("io.netty.allocator.maxOrder", 11);
@@ -61,6 +62,7 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator {
             maxOrderFallbackCause = t;
             defaultMaxOrder = 11;
         }
+        //默认MaxOrder是11
         DEFAULT_MAX_ORDER = defaultMaxOrder;
 
         // Determine reasonable default for nHeapArena and nDirectArena.
@@ -195,7 +197,7 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator {
     private static <T> PoolArena<T>[] newArenaArray(int size) {
         return new PoolArena[size];
     }
-
+//计算PageShit，计算出页面大小的掩码的长度
     private static int validateAndCalculatePageShifts(int pageSize) {
         if (pageSize < MIN_PAGE_SIZE) {
             throw new IllegalArgumentException("pageSize: " + pageSize + " (expected: " + MIN_PAGE_SIZE + "+)");
@@ -208,7 +210,8 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator {
         // Logarithm base 2. At this point we know that pageSize is a power of two.
         return Integer.SIZE - 1 - Integer.numberOfLeadingZeros(pageSize);
     }
-
+//PoolChunk中的maxOreder不能大于14
+//计算出Chunk的大小默认16MB(16785408)
     private static int validateAndCalculateChunkSize(int pageSize, int maxOrder) {
         if (maxOrder > 14) {
             throw new IllegalArgumentException("maxOrder: " + maxOrder + " (expected: 0-14)");

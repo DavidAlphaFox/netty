@@ -21,7 +21,7 @@ import io.netty.util.internal.StringUtil;
 
 import java.nio.ByteBuffer;
 
-//一个Areana下面有一堆Chunk
+
 abstract class PoolArena<T> {
 
     static final int numTinySubpagePools = 512 >>> 4;
@@ -54,17 +54,19 @@ abstract class PoolArena<T> {
         this.pageShifts = pageShifts;
         this.chunkSize = chunkSize;
         subpageOverflowMask = ~(pageSize - 1);
+        //32个512字节的小池
         tinySubpagePools = newSubpagePoolArray(numTinySubpagePools);
         for (int i = 0; i < tinySubpagePools.length; i ++) {
             tinySubpagePools[i] = newSubpagePoolHead(pageSize);
         }
-
+        //当PageSize为8192(8KB)时候，pageShit为32 - 1 - 18 = 13，也就是13位全为0第14位为1
+        //numSmallSubpagePools保证大于512字节，且小于等于PageSize的页面都可以在SmallSubpagePools中
         numSmallSubpagePools = pageShifts - 9;
         smallSubpagePools = newSubpagePoolArray(numSmallSubpagePools);
         for (int i = 0; i < smallSubpagePools.length; i ++) {
             smallSubpagePools[i] = newSubpagePoolHead(pageSize);
         }
-
+//表示使用量分别为0-25%，1%-50%，25%-75%，50%-100%,75%-100%，100%
         q100 = new PoolChunkList<T>(this, null, 100, Integer.MAX_VALUE);
         q075 = new PoolChunkList<T>(this, q100, 75, 100);
         q050 = new PoolChunkList<T>(this, q075, 50, 100);
@@ -101,6 +103,7 @@ abstract class PoolArena<T> {
     }
 
     static int tinyIdx(int normCapacity) {
+        //无符号的右移动
         return normCapacity >>> 4;
     }
 
@@ -146,7 +149,7 @@ abstract class PoolArena<T> {
                 tableIdx = smallIdx(normCapacity);
                 table = smallSubpagePools;
             }
-            //如果不能从外部分配，尝试从缓存中寻找可用的内存
+            //不能从cache中分配，只能从Subpage中选择
             synchronized (this) {
                 final PoolSubpage<T> head = table[tableIdx];
                 final PoolSubpage<T> s = head.next;
@@ -159,12 +162,14 @@ abstract class PoolArena<T> {
                 }
             }
         } else if (normCapacity <= chunkSize) {
+            // 大于PageSize但是小于chunkSize，直接从cache分配
             if (cache.allocateNormal(this, buf, reqCapacity, normCapacity)) {
                 // was able to allocate out of the cache so move on
                 return;
             }
         } else {
             // Huge allocations are never served via the cache so just call allocateHuge
+            // Huge是不会被缓存的页面
             allocateHuge(buf, reqCapacity);
             return;
         }
@@ -177,7 +182,8 @@ abstract class PoolArena<T> {
             q075.allocate(buf, reqCapacity, normCapacity) || q100.allocate(buf, reqCapacity, normCapacity)) {
             return;
         }
-
+        //当我们从ChunkList中拿不出内存的时候
+        //我们需要创建一个新的Chunk，放到ChunkList中
         // Add a new chunk.
         PoolChunk<T> c = newChunk(pageSize, maxOrder, pageShifts, chunkSize);
         long handle = c.allocate(normCapacity);

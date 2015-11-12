@@ -105,6 +105,7 @@ package io.netty.buffer;
 *  我们定义page是一堆可以分配的内存区域
 *  我们定义chunk是page的集合体
 *  我们定义chunkSize = 2^{maxOrder} * pageSize
+*  其中maxOrder默认为11
 *
 *  一开始我们申请一个chunkSize的byte array
 *  如果每次有请求的时候，我们找到第一个合适的内存返回去
