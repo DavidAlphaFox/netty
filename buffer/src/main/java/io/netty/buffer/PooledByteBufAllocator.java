@@ -211,7 +211,7 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator {
         return Integer.SIZE - 1 - Integer.numberOfLeadingZeros(pageSize);
     }
 //PoolChunk中的maxOreder不能大于14
-//计算出Chunk的大小默认16MB(16785408)
+//计算出Chunk的大小默认16MB(16777216)
     private static int validateAndCalculateChunkSize(int pageSize, int maxOrder) {
         if (maxOrder > 14) {
             throw new IllegalArgumentException("maxOrder: " + maxOrder + " (expected: 0-14)");

@@ -146,6 +146,7 @@ abstract class PooledByteBuf<T> extends AbstractReferenceCountedByteBuf {
             memory = null;
             boolean sameThread = initThread == Thread.currentThread();
             initThread = null;
+            //通过从chunk来的arena来回收
             chunk.arena.free(chunk, handle, maxLength, sameThread);
             recycle();
         }

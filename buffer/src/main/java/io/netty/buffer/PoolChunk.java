@@ -153,18 +153,24 @@ final class PoolChunk<T> {
         this.maxOrder = maxOrder;
         this.chunkSize = chunkSize;
         unusable = (byte) (maxOrder + 1);
+        //默认log2(2^11*2^13) = 24
         log2ChunkSize = log2(chunkSize);
         subpageOverflowMask = ~(pageSize - 1);
         freeBytes = chunkSize;
 
         assert maxOrder < 30 : "maxOrder should be < 30, but is: " + maxOrder;
+        //默认最大2048个subpage
         maxSubpageAllocs = 1 << maxOrder;
 
         // Generate the memory map.
+        //memoryMap默认是4096个
         memoryMap = new byte[maxSubpageAllocs << 1];
+        //depthMap默认也是4096个
         depthMap = new byte[memoryMap.length];
         int memoryMapIndex = 1;
+        //使用数组构建树
         for (int d = 0; d <= maxOrder; ++ d) { // move down the tree one level at a time
+            //1,2,4,8,16,32,64,128,256,512,1024,2048
             int depth = 1 << d;
             for (int p = 0; p < depth; ++ p) {
                 // in each level traverse left to right and set value to the depth of subtree
@@ -173,7 +179,7 @@ final class PoolChunk<T> {
                 memoryMapIndex ++;
             }
         }
-
+        //构建子页面数组
         subpages = newSubpageArray(maxSubpageAllocs);
     }
 
@@ -202,6 +208,7 @@ final class PoolChunk<T> {
 
     int usage() {
         final int freeBytes = this.freeBytes;
+        //如果没有freeBytes的话，直接返回100
         if (freeBytes == 0) {
             return 100;
         }
@@ -351,10 +358,12 @@ final class PoolChunk<T> {
      * @param handle handle to free
      */
     void free(long handle) {
+        //handle是memoryMap的索引
         int memoryMapIdx = (int) handle;
         int bitmapIdx = (int) (handle >>> Integer.SIZE);
 
         if (bitmapIdx != 0) { // free a subpage
+            //如果位图不为0，那么这个buffer在subpage上
             PoolSubpage<T> subpage = subpages[subpageIdx(memoryMapIdx)];
             assert subpage != null && subpage.doNotDestroy;
             if (subpage.free(bitmapIdx & 0x3FFFFFFF)) {
@@ -372,6 +381,7 @@ final class PoolChunk<T> {
         if (bitmapIdx == 0) {
             byte val = value(memoryMapIdx);
             assert val == unusable : String.valueOf(val);
+            //让PooledByteBuf的后端存储直接映射到当前Chunk的memory上
             buf.init(this, handle, runOffset(memoryMapIdx), reqCapacity, runLength(memoryMapIdx));
         } else {
             initBufWithSubpage(buf, handle, bitmapIdx, reqCapacity);

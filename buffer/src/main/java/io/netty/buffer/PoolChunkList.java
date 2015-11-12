@@ -66,9 +66,13 @@ final class PoolChunkList<T> {
     void free(PoolChunk<T> chunk, long handle) {
         chunk.free(handle);
         if (chunk.usage() < minUsage) {
+            //chunk的使用小于当前最小的
+            //将这个chunk放入前面的列表中
             remove(chunk);
             if (prevList == null) {
                 assert chunk.usage() == 0;
+                //当某个Chunk没被分配任何内存块的时候，会被释放掉
+                //防止内存爆掉
                 arena.destroyChunk(chunk);
             } else {
                 prevList.add(chunk);

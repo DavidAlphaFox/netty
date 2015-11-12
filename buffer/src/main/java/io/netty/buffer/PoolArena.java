@@ -80,6 +80,8 @@ abstract class PoolArena<T> {
         q025.prevList = q000;
         q000.prevList = null;
         qInit.prevList = qInit;
+        // qInit -> q000 -> q025 -> q050 -> q075 -> q100
+        // q000 <- q025 <- q050 <- q075 <- q100
     }
 
     private PoolSubpage<T> newSubpagePoolHead(int pageSize) {
@@ -126,7 +128,7 @@ abstract class PoolArena<T> {
     static boolean isTiny(int normCapacity) {
         return (normCapacity & 0xFFFFFE00) == 0;
     }
-//分配一块内存
+    //分配一块内存
     private void allocate(PoolThreadCache cache, PooledByteBuf<T> buf, final int reqCapacity) {
         //将需求的大小进行取整
         final int normCapacity = normalizeCapacity(reqCapacity);
@@ -149,7 +151,7 @@ abstract class PoolArena<T> {
                 tableIdx = smallIdx(normCapacity);
                 table = smallSubpagePools;
             }
-            //不能从cache中分配，只能从Subpage中选择
+            //不能从线程cache中分配，只能从Subpage中选择
             synchronized (this) {
                 final PoolSubpage<T> head = table[tableIdx];
                 final PoolSubpage<T> s = head.next;
@@ -162,7 +164,7 @@ abstract class PoolArena<T> {
                 }
             }
         } else if (normCapacity <= chunkSize) {
-            // 大于PageSize但是小于chunkSize，直接从cache分配
+            // 大于PageSize但是小于chunkSize，直接从线程cache分配
             if (cache.allocateNormal(this, buf, reqCapacity, normCapacity)) {
                 // was able to allocate out of the cache so move on
                 return;
@@ -173,6 +175,7 @@ abstract class PoolArena<T> {
             allocateHuge(buf, reqCapacity);
             return;
         }
+        //否则尝试全局分配
         allocateNormal(buf, reqCapacity, normCapacity);
     }
 
@@ -198,16 +201,21 @@ abstract class PoolArena<T> {
 
     void free(PoolChunk<T> chunk, long handle, int normCapacity, boolean sameThreads) {
         if (chunk.unpooled) {
+            //如果Chunk是非池化的
+            //例如Huge
             destroyChunk(chunk);
         } else {
             if (sameThreads) {
+                //分配和回收的线程如果是相同的线程
+                //那么把自己直接放入线程Cache中
                 PoolThreadCache cache = parent.threadCache.get();
                 if (cache.add(this, chunk, handle, normCapacity)) {
                     // cached so not free it.
                     return;
                 }
             }
-
+            //否则加锁进行回收
+            //此处就是放入全局的ChunkList中
             synchronized (this) {
                 chunk.parent.free(chunk, handle);
             }
@@ -407,7 +415,8 @@ abstract class PoolArena<T> {
         protected PoolChunk<byte[]> newUnpooledChunk(int capacity) {
             return new PoolChunk<byte[]>(this, new byte[capacity], capacity);
         }
-
+        //heap上的内存，在没有地方接收的时候
+        //会出现没任何引用的情况，然后被GC回收掉
         @Override
         protected void destroyChunk(PoolChunk<byte[]> chunk) {
             // Rely on GC.
