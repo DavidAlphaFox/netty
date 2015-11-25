@@ -28,7 +28,11 @@ import io.netty.util.internal.RecyclableMpscLinkedQueueNode;
 import io.netty.util.internal.StringUtil;
 
 import java.net.SocketAddress;
-
+// AbstractChannelHandlerContext的invoke开头的函数在执行的时候
+// 都将自己作为Ctx传入ChannelHandler的回调中
+// fire开头的函数在执行的时候
+// 都是先找到自己的下一个AbstractChannelHandlerContext，然后将下一个作为主体
+// 去进行invoke类型的函数调用，从而达到ctx的切换
 abstract class AbstractChannelHandlerContext extends DefaultAttributeMap implements ChannelHandlerContext {
 
     volatile AbstractChannelHandlerContext next;
@@ -283,7 +287,7 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap impleme
         if (event == null) {
             throw new NullPointerException("event");
         }
-
+        // 从Inbound上找到下一个handler
         final AbstractChannelHandlerContext next = findContextInbound();
         EventExecutor executor = next.executor();
         if (executor.inEventLoop()) {
@@ -856,7 +860,7 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap impleme
         }
         return true;
     }
-//从头开始遍历，找到第一个Inbound的ChannelCtx
+//从当前的ctx开始遍历，找到第一个Inbound的ChannelCtx
     private AbstractChannelHandlerContext findContextInbound() {
         AbstractChannelHandlerContext ctx = this;
         do {
