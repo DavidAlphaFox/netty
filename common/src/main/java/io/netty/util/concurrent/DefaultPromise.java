@@ -129,7 +129,8 @@ public class DefaultPromise<V> extends AbstractFuture<V> implements Promise<V> {
         }
         return null;
     }
-
+    // 如果已经完成
+    // 会立刻触发Listener
     @Override
     public Promise<V> addListener(GenericFutureListener<? extends Future<? super V>> listener) {
         if (listener == null) {
