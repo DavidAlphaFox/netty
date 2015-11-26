@@ -182,7 +182,8 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
     public ChannelFuture disconnect() {
         return pipeline.disconnect();
     }
-
+    // 关闭Channel的时候
+    // 是要通过pipeline来关闭的
     @Override
     public ChannelFuture close() {
         return pipeline.close();

@@ -828,7 +828,8 @@ final class DefaultChannelPipeline implements ChannelPipeline {
     public ChannelFuture disconnect() {
         return tail.disconnect();
     }
-
+    //直接用TailContext来关闭
+    //最后会落到HeaderContext
     @Override
     public ChannelFuture close() {
         return tail.close();
@@ -1044,7 +1045,7 @@ final class DefaultChannelPipeline implements ChannelPipeline {
         public void disconnect(ChannelHandlerContext ctx, ChannelPromise promise) throws Exception {
             unsafe.disconnect(promise);
         }
-
+        //使用unsafe的关闭方法
         @Override
         public void close(ChannelHandlerContext ctx, ChannelPromise promise) throws Exception {
             unsafe.close(promise);
