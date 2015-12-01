@@ -34,7 +34,8 @@ import java.net.SocketAddress;
 // 都是先找到自己的下一个AbstractChannelHandlerContext，然后将下一个作为主体
 // 去进行invoke类型的函数调用，从而达到ctx的切换
 abstract class AbstractChannelHandlerContext extends DefaultAttributeMap implements ChannelHandlerContext {
-
+    // 使用volatile只能保证变量的读写是线程安全的
+    // 但是不能保证自增或自减是线程安全的
     volatile AbstractChannelHandlerContext next;
     volatile AbstractChannelHandlerContext prev;
 
