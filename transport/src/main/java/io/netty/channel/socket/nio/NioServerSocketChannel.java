@@ -126,7 +126,8 @@ public class NioServerSocketChannel extends AbstractNioMessageChannel
     protected void doBind(SocketAddress localAddress) throws Exception {
         javaChannel().socket().bind(localAddress, config.getBacklog());
     }
-
+    // 关闭当前Channel
+    // 业务channel并没有关闭
     @Override
     protected void doClose() throws Exception {
         javaChannel().close();

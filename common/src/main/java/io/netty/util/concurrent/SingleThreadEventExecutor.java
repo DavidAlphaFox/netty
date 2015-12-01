@@ -724,9 +724,11 @@ public abstract class SingleThreadEventExecutor extends AbstractEventExecutor {
         }
 
         boolean inEventLoop = inEventLoop();
+        // 如果在同一个EventLoop中，就直接添加任务
         if (inEventLoop) {
             addTask(task);
         } else {
+            //不再一个EventLoop中
             startThread();
             addTask(task);
             if (isShutdown() && removeTask(task)) {

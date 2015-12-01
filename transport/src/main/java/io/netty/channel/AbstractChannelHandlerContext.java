@@ -425,6 +425,8 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap impleme
 
     @Override
     public ChannelFuture close() {
+        // 创建一个新的Promise
+        // 然后进行关闭操作
         return close(newPromise());
     }
 
@@ -800,7 +802,7 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap impleme
 
         return false;
     }
-
+    // 默认在当前的Eventloop上创建一个新的promise
     @Override
     public ChannelPromise newPromise() {
         return new DefaultChannelPromise(channel(), executor());

@@ -182,7 +182,8 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
     public ChannelFuture disconnect() {
         return pipeline.disconnect();
     }
-
+    // 关闭Channel的时候
+    // 是要通过pipeline来关闭的
     @Override
     public ChannelFuture close() {
         return pipeline.close();
@@ -428,6 +429,8 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
                 register0(promise);
             } else {
                 try {
+                    //有件事情需要说明下
+                    //EventLoop在第一次调用execute的时候才真正让线程执行起来
                     eventLoop.execute(new OneTimeTask() {
                         @Override
                         public void run() {

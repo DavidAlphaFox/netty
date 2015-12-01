@@ -129,7 +129,8 @@ public class DefaultPromise<V> extends AbstractFuture<V> implements Promise<V> {
         }
         return null;
     }
-
+    // 如果已经完成
+    // 会立刻触发Listener
     @Override
     public Promise<V> addListener(GenericFutureListener<? extends Future<? super V>> listener) {
         if (listener == null) {
@@ -580,7 +581,10 @@ public class DefaultPromise<V> extends AbstractFuture<V> implements Promise<V> {
                 return;
             }
         }
-
+        // 当setSuccess的时候
+        // 如果不在创建的EventLoop上的时候
+        // 我们需要将自身放到创建的EventLoop上去Notify
+        // 很有可能这个事件会发生的Channel异常之后
         if (listeners instanceof DefaultFutureListeners) {
             final DefaultFutureListeners dfl = (DefaultFutureListeners) listeners;
             execute(executor, new Runnable() {
