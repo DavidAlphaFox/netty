@@ -142,6 +142,7 @@ final class DefaultChannelPipeline implements ChannelPipeline {
         newCtx.prev = prev;
         newCtx.next = tail;
         prev.next = newCtx;
+        // 先保证next链正常工作
         tail.prev = newCtx;
         //放入hash表中
         name2ctx.put(name, newCtx);
