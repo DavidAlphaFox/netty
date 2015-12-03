@@ -308,8 +308,10 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
         }
     }
 
-    //先获取一个Channel
-    //然后调用虚函数init来初始化该Channel
+    // 先获取一个Channel
+    // 然后调用虚函数init来初始化该Channel
+    // 需要注意，Acceptor实际上只使用了Eventloop中的一个线程
+    // 其实没有必要建立大量的Boss线程
     final ChannelFuture initAndRegister() {
         //得到一个新的Channel
         final Channel channel = channelFactory().newChannel();
