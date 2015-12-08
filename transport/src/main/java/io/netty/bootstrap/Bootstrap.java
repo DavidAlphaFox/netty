@@ -157,6 +157,7 @@ public class Bootstrap extends AbstractBootstrap<Bootstrap, Channel> {
 
         // This method is invoked before channelRegistered() is triggered.  Give user handlers a chance to set up
         // the pipeline in its channelRegistered() implementation.
+        // 让channel在eventloop上执行
         channel.eventLoop().execute(new Runnable() {
             @Override
             public void run() {

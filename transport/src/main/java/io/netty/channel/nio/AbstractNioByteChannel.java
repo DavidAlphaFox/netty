@@ -139,6 +139,8 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
                     if (localReadAmount <= 0) {
                         // not was read release the buffer
                         byteBuf.release();
+                        // 当读取数据数量为0的时候
+                        // 我们认为对面关闭的Channel
                         close = localReadAmount < 0;
                         break;
                     }
