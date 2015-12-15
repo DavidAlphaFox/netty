@@ -686,6 +686,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
 
             int size;
             try {
+                // 过滤消息
                 msg = filterOutboundMessage(msg);
                 size = estimatorHandle().size(msg);
                 if (size < 0) {
