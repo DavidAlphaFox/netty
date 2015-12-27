@@ -342,8 +342,10 @@ public final class NioEventLoop extends SingleThreadEventLoop {
                     // It is inefficient in that it wakes up the selector for both
                     // the first case (BAD - wake-up required) and the second case
                     // (OK - no wake-up required).
-                    //防止wakenUp的设置被忽略掉
-                    //前面的注视很详细的解释的race condition的情况
+                    // 防止wakenUp的设置被忽略掉
+                    // 前面的注视很详细的解释的race condition的情况
+                    // 在第一种状况下，selector很有可能已经完成了wakeup，但是还有很多wakeup被触发
+                    // 所以如果是true的状态，我们再次投递这个状态会让selector在第二次select的时候立刻返回
                     if (wakenUp.get()) {
                         selector.wakeup();
                     }
