@@ -72,6 +72,11 @@ import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
  * timer facility'</a>.  More comprehensive slides are located
  * <a href="http://www.cse.wustl.edu/~cdgill/courses/cs6874/TimingWheels.ppt">here</a>.
  */
+
+/**
+ * HashedWheelTimer每次fire后都会移除时间任务
+ * 需要重新添加
+ */
 public class HashedWheelTimer implements Timer {
 
     static final InternalLogger logger =

@@ -513,7 +513,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
 
             safeSetSuccess(promise);
         }
-
+        // 在disconnect的时候会fireChannelInactive
         @Override
         public final void disconnect(final ChannelPromise promise) {
             if (!promise.setUncancellable()) {
@@ -541,7 +541,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
             safeSetSuccess(promise);
             closeIfClosed(); // doDisconnect() might have closed the channel
         }
-
+        // 执行close的时候也会fireChannelInactive
         @Override
         public final void close(final ChannelPromise promise) {
             //保证Promise是不能Cancel的
@@ -565,7 +565,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
                 safeSetSuccess(promise);
                 return;
             }
-
+            // 主动close的时候
             boolean wasActive = isActive();
             ChannelOutboundBuffer outboundBuffer = this.outboundBuffer;
             this.outboundBuffer = null; // Disallow adding any messages and flushes to outboundBuffer.
@@ -686,6 +686,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
 
             int size;
             try {
+                // 过滤消息
                 msg = filterOutboundMessage(msg);
                 size = estimatorHandle().size(msg);
                 if (size < 0) {

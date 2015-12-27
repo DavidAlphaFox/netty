@@ -871,7 +871,7 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap impleme
         } while (!ctx.inbound);
         return ctx;
     }
-
+    // 从当前Context向前找
     private AbstractChannelHandlerContext findContextOutbound() {
         AbstractChannelHandlerContext ctx = this;
         do {
