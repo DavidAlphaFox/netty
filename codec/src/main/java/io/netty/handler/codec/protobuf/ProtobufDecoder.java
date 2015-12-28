@@ -105,6 +105,11 @@ public class ProtobufDecoder extends MessageToMessageDecoder<ByteBuf> {
         final byte[] array;
         final int offset;
         final int length = msg.readableBytes();
+        // 需要配合ProtobufVarint32FrameDecoder使用
+        // 如果不配合ProtobufVarint32FrameDecoder使用
+        // 猜测会有下面的问题
+        // 1.崩溃
+        // 2.不断的尝试读取并解析流
         if (msg.hasArray()) {
             array = msg.array();
             offset = msg.arrayOffset() + msg.readerIndex();
